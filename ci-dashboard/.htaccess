@@ -1,0 +1,13 @@
+# Deny direct access to data/config files; only index.php/login.php etc. should be hit.
+<FilesMatch "^(config\.php|repos\.json|migrate\.php|dev\.sqlite)$">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+RewriteRule ^cache/ - [F]
+
+<IfModule mod_dir.c>
+    DirectoryIndex index.php
+</IfModule>
+
+Options -Indexes
