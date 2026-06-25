@@ -17,7 +17,7 @@ function repos_save(array $repos): void
     file_put_contents(REPOS_FILE, json_encode(array_values($repos), JSON_PRETTY_PRINT));
 }
 
-function repos_add(string $owner, string $repo): void
+function repos_add(string $owner, string $repo, string $name): void
 {
     $repos = repos_load();
     $key = strtolower("$owner/$repo");
@@ -26,8 +26,14 @@ function repos_add(string $owner, string $repo): void
             return; // already tracked
         }
     }
-    $repos[] = ['owner' => $owner, 'repo' => $repo];
+    $repos[] = ['owner' => $owner, 'repo' => $repo, 'name' => $name];
     repos_save($repos);
+}
+
+// Repos added before the 'name' field existed fall back to the repo slug.
+function repos_display_name(array $r): string
+{
+    return trim($r['name'] ?? '') !== '' ? $r['name'] : $r['repo'];
 }
 
 function repos_remove(string $owner, string $repo): void

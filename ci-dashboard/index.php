@@ -27,11 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if ($action === 'add_repo') {
                 $ownerRepo = trim($_POST['owner_repo'] ?? '');
+                $name = trim($_POST['display_name'] ?? '');
                 if (!preg_match('#^([\w.-]+)/([\w.-]+)$#', $ownerRepo, $m)) {
                     throw new RuntimeException('Enter repo as owner/repo, e.g. octocat/hello-world');
                 }
-                repos_add($m[1], $m[2]);
-                $flash = ['ok', "Added {$m[1]}/{$m[2]}"];
+                if ($name === '') {
+                    throw new RuntimeException('Enter the web-app or website name for this repo.');
+                }
+                repos_add($m[1], $m[2], $name);
+                $flash = ['ok', "Added $name ({$m[1]}/{$m[2]})"];
             } elseif ($action === 'remove_repo') {
                 $owner = $_POST['owner'] ?? '';
                 $repo = $_POST['repo'] ?? '';
@@ -129,10 +133,30 @@ foreach ($repos as $r) {
     $cards[] = [
         'owner' => $owner,
         'repo' => $repo,
+        'name' => repos_display_name($r),
         'branchRows' => $branchRows,
         'fetchError' => $fetchError,
         'workflows' => $workflows,
     ];
+}
+
+// Per-card branch focus (main vs staging), picked via a GET toggle button
+// and remembered only in the URL — no session state needed.
+function ci_branch_param(string $owner, string $repo): string
+{
+    return 'b_' . preg_replace('/[^a-z0-9]+/i', '_', "$owner/$repo");
+}
+
+function ci_selected_branch(array $branchRows, string $owner, string $repo): string
+{
+    $param = ci_branch_param($owner, $repo);
+    $requested = $_GET[$param] ?? null;
+    foreach ($branchRows as $row) {
+        if ($row['branch'] === $requested) {
+            return $requested;
+        }
+    }
+    return $branchRows[0]['branch'] ?? 'main';
 }
 
 $accessibleRepos = [];
@@ -164,11 +188,9 @@ function ci_initials(string $repo): string
 
 // Maps a run's status/conclusion onto the site's existing badge classes
 // (status-active/status-progress/status-delivered from styles.css), adding
-// one new status-failure variant for failed runs. Headline reflects the
-// default branch's latest run (first row), not PR/feature-branch builds.
-function ci_headline_badge(array $branchRows): array
+// one new status-failure variant for failed runs.
+function ci_headline_badge(?array $run): array
 {
-    $run = $branchRows[0]['run'] ?? null;
     if ($run === null) {
         return ['status-delivered', 'No runs yet'];
     }
@@ -183,6 +205,26 @@ function ci_headline_badge(array $branchRows): array
         'failure', 'timed_out' => ['status-failure', 'Failing'],
         'cancelled' => ['status-delivered', 'Cancelled'],
         default => ['status-delivered', $conclusion ?? 'Unknown'],
+    };
+}
+
+// Traffic-light dot: green only when the selected branch's latest run
+// completed successfully; red on failure; amber while running; grey
+// otherwise (no runs, cancelled, unknown).
+function ci_traffic_light_class(?array $run): string
+{
+    if ($run === null) {
+        return 'tl-grey';
+    }
+    $status = $run['status'] ?? '';
+    $conclusion = $run['conclusion'] ?? null;
+    if ($status !== 'completed') {
+        return 'tl-amber';
+    }
+    return match ($conclusion) {
+        'success' => 'tl-green',
+        'failure', 'timed_out' => 'tl-red',
+        default => 'tl-grey',
     };
 }
 
@@ -260,6 +302,24 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
   .run-badge-progress { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: rgba(245,158,11,0.3); }
   .run-badge-cancelled, .run-badge-neutral { background: var(--tag-bg); color: var(--tag-fg); border-color: var(--tag-border); }
   .ci-card-error { color: #ef4444; font-size: 13px; }
+  .ci-repo-slug { font-size: 12px; color: var(--fg-muted); margin: -6px 0 0; }
+  .ci-head-row { display: flex; align-items: center; gap: 8px; }
+  .tl-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
+  .tl-green { background: #22c55e; color: #22c55e; }
+  .tl-red { background: #ef4444; color: #ef4444; }
+  .tl-amber { background: #f59e0b; color: #f59e0b; }
+  .tl-grey { background: #6b7280; color: #6b7280; }
+  .ci-branch-toggle { display: flex; gap: 6px; margin-bottom: 4px; }
+  .ci-branch-toggle a {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--surface-border);
+    color: var(--fg-muted);
+  }
+  .ci-branch-toggle a.active { background: var(--accent-grad); color: var(--bg); border-color: transparent; }
+  .ci-no-workflows { font-size: 12px; color: var(--fg-muted); }
   .ci-manage { border-top: 1px solid var(--surface-border); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
   .ci-manage form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .ci-manage select, .ci-manage input[type=text] {
@@ -340,40 +400,60 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
         <?php foreach ($cards as $card): ?>
           <?php
             $key = $card['owner'] . '/' . $card['repo'];
-            [$badgeClass, $badgeLabel] = ci_headline_badge($card['branchRows']);
+            $selectedBranch = ci_selected_branch($card['branchRows'], $card['owner'], $card['repo']);
+            $selectedRow = null;
+            foreach ($card['branchRows'] as $row) {
+                if ($row['branch'] === $selectedBranch) { $selectedRow = $row; break; }
+            }
+            $selectedRun = $selectedRow['run'] ?? null;
+            [$badgeClass, $badgeLabel] = ci_headline_badge($selectedRun);
+            $tlClass = ci_traffic_light_class($selectedRun);
+            $branchParam = ci_branch_param($card['owner'], $card['repo']);
           ?>
           <div class="project-card ci-card glass">
             <div class="project-thumb">
               <span class="thumb-fallback"><?= htmlspecialchars(ci_initials($card['repo'])) ?></span>
             </div>
             <div class="project-body">
-              <span class="project-status <?= $badgeClass ?>"><?= htmlspecialchars($badgeLabel) ?></span>
-              <h3><?= htmlspecialchars($key) ?></h3>
+              <div class="ci-head-row">
+                <span class="tl-dot <?= $tlClass ?>" title="<?= htmlspecialchars($badgeLabel) ?>"></span>
+                <span class="project-status <?= $badgeClass ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+              </div>
+              <h3><?= htmlspecialchars($card['name']) ?></h3>
+              <p class="ci-repo-slug"><?= htmlspecialchars($key) ?></p>
 
               <?php if ($card['fetchError']): ?>
                 <p class="ci-card-error"><?= htmlspecialchars($card['fetchError']) ?></p>
               <?php elseif (empty($card['branchRows'])): ?>
                 <p class="muted" style="font-size:13px;">No workflow runs found yet.</p>
               <?php else: ?>
+                <?php if (count($card['branchRows']) > 1): ?>
+                  <div class="ci-branch-toggle">
+                    <?php foreach ($card['branchRows'] as $row): ?>
+                      <a class="<?= $row['branch'] === $selectedBranch ? 'active' : '' ?>"
+                         href="?<?= htmlspecialchars($branchParam) ?>=<?= htmlspecialchars(rawurlencode($row['branch'])) ?>#<?= htmlspecialchars($branchParam) ?>">
+                        <?= htmlspecialchars($row['branch']) ?>
+                      </a>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endif; ?>
                 <div class="ci-runs">
-                  <?php foreach ($card['branchRows'] as $row): $run = $row['run']; ?>
-                    <div class="ci-run-row">
-                      <strong><?= htmlspecialchars($row['branch']) ?></strong>
-                      <?php if ($run === null): ?>
-                        <span class="muted">no runs</span>
+                  <div class="ci-run-row">
+                    <strong><?= htmlspecialchars($selectedBranch) ?></strong>
+                    <?php if ($selectedRun === null): ?>
+                      <span class="muted">no runs</span>
+                    <?php else: ?>
+                      <span class="run-badge <?= ci_run_badge_class($selectedRun['conclusion'] ?? null, $selectedRun['status'] ?? '') ?>">
+                        <?= htmlspecialchars($selectedRun['conclusion'] ?? $selectedRun['status'] ?? '-') ?>
+                      </span>
+                      <?php if (!empty($selectedRun['html_url'])): ?>
+                        <a href="<?= htmlspecialchars($selectedRun['html_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(substr($selectedRun['head_sha'] ?? '-', 0, 7)) ?></a>
                       <?php else: ?>
-                        <span class="run-badge <?= ci_run_badge_class($run['conclusion'] ?? null, $run['status'] ?? '') ?>">
-                          <?= htmlspecialchars($run['conclusion'] ?? $run['status'] ?? '-') ?>
-                        </span>
-                        <?php if (!empty($run['html_url'])): ?>
-                          <a href="<?= htmlspecialchars($run['html_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></a>
-                        <?php else: ?>
-                          <span><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></span>
-                        <?php endif; ?>
-                        <span><?= htmlspecialchars(ci_relative_time($run['updated_at'] ?? null)) ?></span>
+                        <span><?= htmlspecialchars(substr($selectedRun['head_sha'] ?? '-', 0, 7)) ?></span>
                       <?php endif; ?>
-                    </div>
-                  <?php endforeach; ?>
+                      <span><?= htmlspecialchars(ci_relative_time($selectedRun['updated_at'] ?? null)) ?></span>
+                    <?php endif; ?>
+                  </div>
                 </div>
               <?php endif; ?>
 
@@ -390,9 +470,11 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
                           <option value="<?= htmlspecialchars($wf['id']) ?>"><?= htmlspecialchars($wf['name']) ?></option>
                         <?php endforeach; ?>
                       </select>
-                      <input type="text" name="ref" value="main" placeholder="branch">
+                      <input type="text" name="ref" value="<?= htmlspecialchars($selectedBranch) ?>" placeholder="branch">
                       <button type="submit" class="btn btn-primary btn-sm">Run workflow</button>
                     </form>
+                  <?php elseif (!$card['fetchError']): ?>
+                    <p class="ci-no-workflows">No GitHub Actions workflows found in this repo — deploys must be happening outside GitHub Actions (e.g. a direct Hostinger/FTP deploy), so there's nothing here to trigger.</p>
                   <?php endif; ?>
                   <form method="post" onsubmit="return confirm('Remove this repo from the dashboard?');">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
@@ -424,6 +506,7 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
                 <input type="text" name="owner_repo" placeholder="owner/repo" required>
                 <p class="muted" style="font-size:12px;margin:0;">Couldn't list repos from GitHub (check token permissions) — type owner/repo manually.</p>
               <?php endif; ?>
+              <input type="text" name="display_name" placeholder="Web-app / website name" required>
               <button type="submit" class="btn btn-primary btn-sm">Add repo</button>
             </form>
           </div>
