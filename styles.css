@@ -736,9 +736,32 @@ button { font-family: inherit; }
 .footer-inner {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 13.5px;
   flex-wrap: wrap;
   gap: 8px;
+}
+.footer-socials {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.footer-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--surface-border);
+  color: var(--text-muted, currentColor);
+  transition: color 200ms var(--ease), border-color 200ms var(--ease), transform 200ms var(--ease);
+}
+.footer-socials a svg { width: 16px; height: 16px; }
+.footer-socials a:hover {
+  color: var(--accent, #6c63ff);
+  border-color: var(--accent, #6c63ff);
+  transform: translateY(-2px);
 }
 
 /* ===== Reveal animation ===== */
