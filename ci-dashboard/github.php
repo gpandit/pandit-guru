@@ -63,19 +63,6 @@ function github_get_repo(string $token, string $owner, string $repo): array
     return github_request($token, 'GET', "/repos/$owner/$repo");
 }
 
-function github_branch_exists(string $token, string $owner, string $repo, string $branch): bool
-{
-    try {
-        github_request($token, 'GET', "/repos/$owner/$repo/branches/" . rawurlencode($branch));
-        return true;
-    } catch (GitHubApiException $e) {
-        if ($e->getCode() === 404) {
-            return false;
-        }
-        throw $e;
-    }
-}
-
 // Repos the token's user can see, for the "add repo" dropdown. Note: this
 // reflects what the user account can see, not strictly the fine-grained
 // token's repo selection — GitHub API calls below will still fail per-repo

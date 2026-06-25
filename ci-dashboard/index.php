@@ -78,6 +78,7 @@ foreach ($repos as $r) {
     $repo = $r['repo'];
     $fetchError = null;
     $branchRows = [];
+    $isPrivate = null;
 
     try {
         $repoInfoKey = "repoinfo:$owner/$repo";
@@ -87,28 +88,27 @@ foreach ($repos as $r) {
             cache_set($repoInfoKey, $repoInfo);
         }
         $defaultBranch = $repoInfo['default_branch'] ?? 'main';
+        $isPrivate = $repoInfo['private'] ?? null;
 
-        $branchesToShow = [$defaultBranch];
+        // Only the Actions API is used here (no /branches calls, which need
+        // a "Contents" read permission this token isn't asked to have) — a
+        // 'staging' branch is shown only if it has ever had a workflow run,
+        // detected via the same Actions call we need anyway.
+        $candidateBranches = [$defaultBranch];
         if ($defaultBranch !== 'staging') {
-            $stagingKey = "branchexists:$owner/$repo:staging";
-            $stagingExists = cache_get($stagingKey, 600);
-            if ($stagingExists === null) {
-                $stagingExists = ['exists' => github_branch_exists($token, $owner, $repo, 'staging')];
-                cache_set($stagingKey, $stagingExists);
-            }
-            if ($stagingExists['exists']) {
-                $branchesToShow[] = 'staging';
-            }
+            $candidateBranches[] = 'staging';
         }
 
-        foreach ($branchesToShow as $branch) {
+        foreach ($candidateBranches as $branch) {
             $cacheKey = "runs:$owner/$repo:$branch";
             $runs = cache_get($cacheKey, $ttl);
             if ($runs === null) {
                 $runs = github_list_runs_for_branch($token, $owner, $repo, $branch, 1);
                 cache_set($cacheKey, $runs);
             }
-            $branchRows[] = ['branch' => $branch, 'run' => $runs[0] ?? null];
+            if ($branch === $defaultBranch || !empty($runs)) {
+                $branchRows[] = ['branch' => $branch, 'run' => $runs[0] ?? null];
+            }
         }
     } catch (Throwable $e) {
         $fetchError = $e->getMessage();
@@ -137,6 +137,7 @@ foreach ($repos as $r) {
         'branchRows' => $branchRows,
         'fetchError' => $fetchError,
         'workflows' => $workflows,
+        'isPrivate' => $isPrivate,
     ];
 }
 
@@ -303,7 +304,19 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
   .run-badge-cancelled, .run-badge-neutral { background: var(--tag-bg); color: var(--tag-fg); border-color: var(--tag-border); }
   .ci-card-error { color: #ef4444; font-size: 13px; }
   .ci-repo-slug { font-size: 12px; color: var(--fg-muted); margin: -6px 0 0; }
-  .ci-head-row { display: flex; align-items: center; gap: 8px; }
+  .ci-head-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .visibility-pill {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--surface-border);
+    color: var(--fg-muted);
+  }
+  .visibility-private { background: rgba(245,158,11,0.1); color: #f59e0b; border-color: rgba(245,158,11,0.25); }
+  .visibility-public { background: var(--tag-bg); color: var(--tag-fg); border-color: var(--tag-border); }
   .tl-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
   .tl-green { background: #22c55e; color: #22c55e; }
   .tl-red { background: #ef4444; color: #ef4444; }
@@ -418,6 +431,11 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
               <div class="ci-head-row">
                 <span class="tl-dot <?= $tlClass ?>" title="<?= htmlspecialchars($badgeLabel) ?>"></span>
                 <span class="project-status <?= $badgeClass ?>"><?= htmlspecialchars($badgeLabel) ?></span>
+                <?php if ($card['isPrivate'] !== null): ?>
+                  <span class="visibility-pill <?= $card['isPrivate'] ? 'visibility-private' : 'visibility-public' ?>">
+                    <?= $card['isPrivate'] ? 'Private' : 'Public' ?>
+                  </span>
+                <?php endif; ?>
               </div>
               <h3><?= htmlspecialchars($card['name']) ?></h3>
               <p class="ci-repo-slug"><?= htmlspecialchars($key) ?></p>

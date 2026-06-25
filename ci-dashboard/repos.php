@@ -14,7 +14,12 @@ function repos_load(): array
 
 function repos_save(array $repos): void
 {
-    file_put_contents(REPOS_FILE, json_encode(array_values($repos), JSON_PRETTY_PRINT));
+    $written = @file_put_contents(REPOS_FILE, json_encode(array_values($repos), JSON_PRETTY_PRINT));
+    if ($written === false) {
+        throw new RuntimeException(
+            "Could not write repos.json — check that the PHP process has write permission on " . REPOS_FILE
+        );
+    }
 }
 
 function repos_add(string $owner, string $repo, string $name): void
