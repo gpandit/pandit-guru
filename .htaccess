@@ -8,6 +8,15 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\.pandit\.guru$ [NC]
 RewriteRule ^(.*)$ https://pandit.guru/$1 [L,R=301]
 
+# News & Blog SPA (React, built from news-blog-app/) — served at /news-blog
+# and its admin panel at /admin. Both paths render the same shell file;
+# client-side routing inside the SPA decides what to show. Real files
+# (admin-api/*, content-api/*, lib/*, image.php, blog-app-assets/*) are left
+# alone by the -f checks below.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(news-blog|admin)(/.*)?$ /blog-app.html [L]
+
 # Default document
 DirectoryIndex index.html
 

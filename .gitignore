@@ -2,3 +2,8 @@
 ci-dashboard/config.php
 ci-dashboard/cache/*.json
 ci-dashboard/dev.sqlite
+lib/.env
+news-blog-app/node_modules
+news-blog-app/dist
+news-blog-app/.env
+news-blog-build

@@ -4,8 +4,14 @@
     {
       "name": "static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8743"],
-      "port": 8743
+      "runtimeArgs": ["-m", "http.server", "8744"],
+      "port": 8744
+    },
+    {
+      "name": "php",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "localhost:8745", ".dev-router.php"],
+      "port": 8745
     }
   ]
 }
