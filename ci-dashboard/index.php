@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 github_dispatch_workflow($token, $owner, $repo, $workflowId, $ref);
                 $flash = ['ok', "Triggered workflow on $owner/$repo@$ref"];
-                // Drop the cached runs for this repo so the table picks up the new run sooner.
-                @unlink(CACHE_DIR . '/' . sha1("runs:$owner/$repo") . '.json');
+                // Drop the cached run for this branch so the card picks up the new run sooner.
+                @unlink(CACHE_DIR . '/' . sha1("runs:$owner/$repo:$ref") . '.json');
             }
         } catch (Throwable $e) {
             $flash = ['error', $e->getMessage()];
@@ -72,18 +72,42 @@ $cards = [];
 foreach ($repos as $r) {
     $owner = $r['owner'];
     $repo = $r['repo'];
-    $cacheKey = "runs:$owner/$repo";
-
-    $runs = cache_get($cacheKey, $ttl);
     $fetchError = null;
-    if ($runs === null) {
-        try {
-            $runs = github_list_runs($token, $owner, $repo, 5);
-            cache_set($cacheKey, $runs);
-        } catch (Throwable $e) {
-            $fetchError = $e->getMessage();
-            $runs = [];
+    $branchRows = [];
+
+    try {
+        $repoInfoKey = "repoinfo:$owner/$repo";
+        $repoInfo = cache_get($repoInfoKey, 600);
+        if ($repoInfo === null) {
+            $repoInfo = github_get_repo($token, $owner, $repo);
+            cache_set($repoInfoKey, $repoInfo);
         }
+        $defaultBranch = $repoInfo['default_branch'] ?? 'main';
+
+        $branchesToShow = [$defaultBranch];
+        if ($defaultBranch !== 'staging') {
+            $stagingKey = "branchexists:$owner/$repo:staging";
+            $stagingExists = cache_get($stagingKey, 600);
+            if ($stagingExists === null) {
+                $stagingExists = ['exists' => github_branch_exists($token, $owner, $repo, 'staging')];
+                cache_set($stagingKey, $stagingExists);
+            }
+            if ($stagingExists['exists']) {
+                $branchesToShow[] = 'staging';
+            }
+        }
+
+        foreach ($branchesToShow as $branch) {
+            $cacheKey = "runs:$owner/$repo:$branch";
+            $runs = cache_get($cacheKey, $ttl);
+            if ($runs === null) {
+                $runs = github_list_runs_for_branch($token, $owner, $repo, $branch, 1);
+                cache_set($cacheKey, $runs);
+            }
+            $branchRows[] = ['branch' => $branch, 'run' => $runs[0] ?? null];
+        }
+    } catch (Throwable $e) {
+        $fetchError = $e->getMessage();
     }
 
     $workflows = [];
@@ -105,10 +129,27 @@ foreach ($repos as $r) {
     $cards[] = [
         'owner' => $owner,
         'repo' => $repo,
-        'runs' => array_slice($runs, 0, 3),
+        'branchRows' => $branchRows,
         'fetchError' => $fetchError,
         'workflows' => $workflows,
     ];
+}
+
+$accessibleRepos = [];
+if ($loggedIn) {
+    $accCacheKey = 'accessible_repos';
+    $accessibleRepos = cache_get($accCacheKey, 600);
+    if ($accessibleRepos === null) {
+        try {
+            $accessibleRepos = github_list_accessible_repos($token);
+            cache_set($accCacheKey, $accessibleRepos);
+        } catch (Throwable $e) {
+            $accessibleRepos = [];
+        }
+    }
+    $trackedKeys = array_map(fn($r) => strtolower($r['owner'] . '/' . $r['repo']), $repos);
+    $accessibleRepos = array_values(array_filter($accessibleRepos, fn($full) => !in_array(strtolower($full), $trackedKeys, true)));
+    sort($accessibleRepos);
 }
 
 function ci_initials(string $repo): string
@@ -123,15 +164,16 @@ function ci_initials(string $repo): string
 
 // Maps a run's status/conclusion onto the site's existing badge classes
 // (status-active/status-progress/status-delivered from styles.css), adding
-// one new status-failure variant for failed runs.
-function ci_headline_badge(array $runs): array
+// one new status-failure variant for failed runs. Headline reflects the
+// default branch's latest run (first row), not PR/feature-branch builds.
+function ci_headline_badge(array $branchRows): array
 {
-    if (empty($runs)) {
+    $run = $branchRows[0]['run'] ?? null;
+    if ($run === null) {
         return ['status-delivered', 'No runs yet'];
     }
-    $latest = $runs[0];
-    $status = $latest['status'] ?? '';
-    $conclusion = $latest['conclusion'] ?? null;
+    $status = $run['status'] ?? '';
+    $conclusion = $run['conclusion'] ?? null;
 
     if ($status !== 'completed') {
         return ['status-progress', $status === 'queued' ? 'Queued' : 'Running'];
@@ -268,6 +310,7 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
     </button>
+    <a class="btn btn-ghost nav-cta" href="../projects.html">&laquo; Back to Projects</a>
     <?php if ($loggedIn): ?>
       <a class="btn btn-ghost nav-cta" href="admin.php">Admin</a>
       <a class="btn btn-primary nav-cta" href="logout.php">Log out</a>
@@ -297,7 +340,7 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
         <?php foreach ($cards as $card): ?>
           <?php
             $key = $card['owner'] . '/' . $card['repo'];
-            [$badgeClass, $badgeLabel] = ci_headline_badge($card['runs']);
+            [$badgeClass, $badgeLabel] = ci_headline_badge($card['branchRows']);
           ?>
           <div class="project-card ci-card glass">
             <div class="project-thumb">
@@ -309,22 +352,26 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
 
               <?php if ($card['fetchError']): ?>
                 <p class="ci-card-error"><?= htmlspecialchars($card['fetchError']) ?></p>
-              <?php elseif (empty($card['runs'])): ?>
+              <?php elseif (empty($card['branchRows'])): ?>
                 <p class="muted" style="font-size:13px;">No workflow runs found yet.</p>
               <?php else: ?>
                 <div class="ci-runs">
-                  <?php foreach ($card['runs'] as $run): ?>
+                  <?php foreach ($card['branchRows'] as $row): $run = $row['run']; ?>
                     <div class="ci-run-row">
-                      <span class="run-badge <?= ci_run_badge_class($run['conclusion'] ?? null, $run['status'] ?? '') ?>">
-                        <?= htmlspecialchars($run['conclusion'] ?? $run['status'] ?? '-') ?>
-                      </span>
-                      <span><?= htmlspecialchars($run['head_branch'] ?? '-') ?></span>
-                      <?php if (!empty($run['html_url'])): ?>
-                        <a href="<?= htmlspecialchars($run['html_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></a>
+                      <strong><?= htmlspecialchars($row['branch']) ?></strong>
+                      <?php if ($run === null): ?>
+                        <span class="muted">no runs</span>
                       <?php else: ?>
-                        <span><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></span>
+                        <span class="run-badge <?= ci_run_badge_class($run['conclusion'] ?? null, $run['status'] ?? '') ?>">
+                          <?= htmlspecialchars($run['conclusion'] ?? $run['status'] ?? '-') ?>
+                        </span>
+                        <?php if (!empty($run['html_url'])): ?>
+                          <a href="<?= htmlspecialchars($run['html_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></a>
+                        <?php else: ?>
+                          <span><?= htmlspecialchars(substr($run['head_sha'] ?? '-', 0, 7)) ?></span>
+                        <?php endif; ?>
+                        <span><?= htmlspecialchars(ci_relative_time($run['updated_at'] ?? null)) ?></span>
                       <?php endif; ?>
-                      <span><?= htmlspecialchars(ci_relative_time($run['updated_at'] ?? null)) ?></span>
                     </div>
                   <?php endforeach; ?>
                 </div>
@@ -366,7 +413,17 @@ $csrf = $loggedIn ? auth_csrf_token() : null;
             <form method="post">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
               <input type="hidden" name="action" value="add_repo">
-              <input type="text" name="owner_repo" placeholder="owner/repo" required>
+              <?php if (!empty($accessibleRepos)): ?>
+                <select name="owner_repo" required>
+                  <option value="" disabled selected>Select a repo&hellip;</option>
+                  <?php foreach ($accessibleRepos as $full): ?>
+                    <option value="<?= htmlspecialchars($full) ?>"><?= htmlspecialchars($full) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              <?php else: ?>
+                <input type="text" name="owner_repo" placeholder="owner/repo" required>
+                <p class="muted" style="font-size:12px;margin:0;">Couldn't list repos from GitHub (check token permissions) — type owner/repo manually.</p>
+              <?php endif; ?>
               <button type="submit" class="btn btn-primary btn-sm">Add repo</button>
             </form>
           </div>

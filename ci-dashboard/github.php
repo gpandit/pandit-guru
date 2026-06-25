@@ -44,10 +44,59 @@ function github_list_runs(string $token, string $owner, string $repo, int $perPa
     return $data['workflow_runs'] ?? [];
 }
 
+// Most recent workflow runs restricted to a single branch.
+function github_list_runs_for_branch(string $token, string $owner, string $repo, string $branch, int $perPage = 1): array
+{
+    $qs = http_build_query(['branch' => $branch, 'per_page' => $perPage]);
+    $data = github_request($token, 'GET', "/repos/$owner/$repo/actions/runs?$qs");
+    return $data['workflow_runs'] ?? [];
+}
+
 function github_list_workflows(string $token, string $owner, string $repo): array
 {
     $data = github_request($token, 'GET', "/repos/$owner/$repo/actions/workflows");
     return $data['workflows'] ?? [];
+}
+
+function github_get_repo(string $token, string $owner, string $repo): array
+{
+    return github_request($token, 'GET', "/repos/$owner/$repo");
+}
+
+function github_branch_exists(string $token, string $owner, string $repo, string $branch): bool
+{
+    try {
+        github_request($token, 'GET', "/repos/$owner/$repo/branches/" . rawurlencode($branch));
+        return true;
+    } catch (GitHubApiException $e) {
+        if ($e->getCode() === 404) {
+            return false;
+        }
+        throw $e;
+    }
+}
+
+// Repos the token's user can see, for the "add repo" dropdown. Note: this
+// reflects what the user account can see, not strictly the fine-grained
+// token's repo selection — GitHub API calls below will still fail per-repo
+// if the token wasn't actually scoped to it.
+function github_list_accessible_repos(string $token): array
+{
+    $repos = [];
+    for ($page = 1; $page <= 3; $page++) {
+        $qs = http_build_query(['per_page' => 100, 'page' => $page, 'sort' => 'pushed', 'affiliation' => 'owner,collaborator,organization_member']);
+        $data = github_request($token, 'GET', "/user/repos?$qs");
+        if (empty($data)) {
+            break;
+        }
+        foreach ($data as $r) {
+            $repos[] = $r['full_name'] ?? null;
+        }
+        if (count($data) < 100) {
+            break;
+        }
+    }
+    return array_values(array_filter($repos));
 }
 
 // Triggers a workflow_dispatch event. $ref is the branch/tag to run on.
