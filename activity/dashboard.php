@@ -3,23 +3,48 @@
 // POST ?token=…  with JSON body  → stores data/<device>.json  (collector.py upload)
 // GET  ?token=… once per browser → sets cookie, then plain dashboard.php works
 // Secrets live in activity/config.php — gitignored, uploaded once via File Manager:
-//   <?php const TOKEN = '<long random string>';   // optionally: define('DATA_DIR', '/path');
+//   <?php const TOKEN = '<long random string>';         // used by collector.py uploads
+//         const DASH_PASSWORD = '<short memorable one>'; // used by humans to log in
+//   // optionally: define('DATA_DIR', '/path');
 if (is_file(__DIR__ . '/config.php')) require __DIR__ . '/config.php';
 if (!defined('TOKEN')) { http_response_code(500); exit('activity/config.php missing — define TOKEN'); }
 if (!defined('DATA_DIR')) define('DATA_DIR', __DIR__ . '/data');
 
+function set_auth_cookie() {
+    setcookie('gitboard', TOKEN, ['expires' => time() + 31536000, 'path' => '/',
+                                  'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
+}
+
 $tok = $_GET['token'] ?? $_COOKIE['gitboard'] ?? '';
+
+// human login: short password → same cookie the token sets
+if ($tok !== TOKEN && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
+    if (defined('DASH_PASSWORD') && hash_equals(DASH_PASSWORD, (string)$_POST['password'])) {
+        set_auth_cookie();
+        header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
+        exit;
+    }
+    $login_error = 'Wrong password.';
+}
+
 if ($tok !== TOKEN) {
-    http_response_code(403);
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') exit('forbidden');   // collector POST: plain reply
-    exit('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="2;url=./">'
-       . '<body style="font-family:system-ui;display:grid;place-items:center;height:90vh">'
-       . '<p>🔒 Not authorised — returning to the <a href="./">public page</a>…</p>');
+    // collector upload (JSON POST, no password field) → plain reply, no HTML
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['password'])) { http_response_code(403); exit('forbidden'); }
+    // everyone else → password prompt
+    http_response_code(isset($login_error) ? 401 : 200);
+    $err = isset($login_error) ? '<p style="color:#dc2626;font-size:.85rem">' . $login_error . '</p>' : '';
+    exit('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+       . '<title>gitboard — sign in</title><body style="font-family:system-ui;display:grid;place-items:center;min-height:90vh;margin:0">'
+       . '<form method="post" style="display:grid;gap:.7rem;width:min(20rem,90vw);text-align:center">'
+       . '<h1 style="font-size:1.1rem;margin:0">🔒 gitboard</h1>'
+       . '<input type="password" name="password" placeholder="password" autofocus required '
+       . 'style="padding:.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:1rem">'
+       . '<button style="padding:.6rem;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:1rem;cursor:pointer">Sign in</button>'
+       . $err . '<a href="./" style="font-size:.8rem;color:#64748b">← public page</a></form>');
 }
 // browser visited with ?token= → set year-long cookie, redirect to clean URL
 if (isset($_GET['token']) && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    setcookie('gitboard', TOKEN, ['expires' => time() + 31536000, 'path' => '/',
-                                  'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
+    set_auth_cookie();
     header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
