@@ -258,7 +258,7 @@ button { font-family: inherit; }
   position: relative;
   width: 100%;
   max-width: 380px;
-  aspect-ratio: 4/5;
+  aspect-ratio: 1/1;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--surface-border);
