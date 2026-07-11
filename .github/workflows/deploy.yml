@@ -1,0 +1,12 @@
+name: Deploy to pandit.guru
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Hostinger deploy webhook
+        run: curl -sf -X POST "${{ secrets.HOSTINGER_DEPLOY_WEBHOOK }}"
