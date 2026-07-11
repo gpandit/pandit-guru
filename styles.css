@@ -258,7 +258,7 @@ button { font-family: inherit; }
   position: relative;
   width: 100%;
   max-width: 380px;
-  aspect-ratio: 4/5;
+  aspect-ratio: 1/1;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--surface-border);
@@ -598,6 +598,7 @@ button { font-family: inherit; }
   margin: 0 0 16px;
 }
 .page-hero p { color: var(--fg-muted); font-size: 18px; max-width: 600px; }
+.hero-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
 
 /* ===== Projects grid ===== */
 .idea-banner {

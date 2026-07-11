@@ -64,13 +64,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="eyebrow reveal">What I'm building</p>
       <h1 class="reveal">Projects &amp; portals</h1>
       <p class="reveal">A mix of client delivery work and my own ventures — eCommerce, health-tech, and community platforms I'm actively involved in.</p>
-      <a class="btn btn-primary reveal" href="/activity/">View Ongoing Build</a>
+      <div class="hero-cta-row reveal">
+        <a class="btn btn-primary" href="/activity/">View Ongoing Build</a>
+        <a class="btn btn-ghost" href="#client-work">Client &amp; delivery work →</a>
+      </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="build-work">
     <div class="container">
-      <div class="projects-grid reveal">
+      <p class="section-eyebrow">Sorted by recent activity, from GitHub</p>
+      <h2 class="section-title">GitHub build work</h2>
+      <div class="projects-grid reveal" id="build-grid">
 
         <div class="project-card glass">
           <div class="project-thumb">
@@ -86,47 +91,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">AD</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-active">Active</span>
-            <h3>Aqualeo Digecom</h3>
-            <p>Program &amp; delivery management consultancy helping SMEs launch eCommerce portals and execute cloud transformation programs end to end.</p>
-            <div class="project-tags"><span>eCommerce</span><span>Cloud</span><span>Delivery</span></div>
-            <a class="project-link" href="https://www.aqualeo.co" target="_blank" rel="nofollow noopener">www.aqualeo.co</a>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">HO</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>HospitalityOS</h3>
-            <p>A hotel management platform covering reservations, front-desk operations and property administration in one system.</p>
-            <div class="project-tags"><span>Hospitality</span><span>SaaS</span><span>Operations</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">VY</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>Voyager</h3>
-            <p>A full-scale travel platform built as a microservices monorepo — managing trips, accommodations, expenses, billing and notifications end to end.</p>
-            <div class="project-tags"><span>Travel</span><span>Microservices</span><span>Node.js</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
+        <div class="project-card glass" data-repo="rooted">
           <div class="project-thumb">
             <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
             <span class="thumb-fallback">RT</span>
@@ -140,7 +105,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <div class="project-card glass">
+        <div class="project-card glass" data-repo="hospitalityos">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">HO</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>HospitalityOS</h3>
+            <p>A hotel management platform covering reservations, front-desk operations and property administration in one system.</p>
+            <div class="project-tags"><span>Hospitality</span><span>SaaS</span><span>Operations</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="voyager">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">VY</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>Voyager</h3>
+            <p>A full-scale travel platform built as a microservices monorepo — managing trips, accommodations, expenses, billing and notifications end to end.</p>
+            <div class="project-tags"><span>Travel</span><span>Microservices</span><span>Node.js</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="dietassure">
           <div class="project-thumb">
             <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
             <span class="thumb-fallback">DA</span>
@@ -150,6 +141,95 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <h3>DietAssure</h3>
             <p>A food-label scanning app helping people make sense of ingredients and allergens at the point of purchase.</p>
             <div class="project-tags"><span>Mobile</span><span>Health-tech</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="panchang">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">PA</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>Panchang App</h3>
+            <p>A Hindu calendar and ritual-timing app, bringing traditional Panchang calculations to a modern interface.</p>
+            <div class="project-tags"><span>Mobile</span><span>Culture</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="shca-pledge-portal">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">SP</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>SHCA Pledge Portal</h3>
+            <p>A community pledge and membership portal, built to make commitments and contributions transparent and easy to track.</p>
+            <div class="project-tags"><span>Community</span><span>Portal</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="housemates">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">HM</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>Housemates</h3>
+            <p>An app for finding compatible future housemates, then managing the shared household afterwards — bills, chores and house rules in one place.</p>
+            <div class="project-tags"><span>Mobile</span><span>Community</span><span>Household</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="family-hub">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">FH</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-progress">In progress</span>
+            <h3>Family Hub</h3>
+            <p>A family home-management app — shared calendar, to-dos, movie lists and holiday plans, plus a reward system where parents can convert completed chores and homework into TV time, going-out money, or savings toward a bigger gift.</p>
+            <div class="project-tags"><span>Mobile</span><span>Web</span><span>Family</span></div>
+          </div>
+        </div>
+
+        <div class="project-card glass" data-repo="ci-dashboard">
+          <div class="project-thumb">
+            <span class="thumb-fallback">CI</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-active">Active</span>
+            <h3>CI/CD Dashboard</h3>
+            <p>Live GitHub Actions status across my repos — build/deploy status at a glance, viewable by anyone, with a login for adding repos or triggering deploys.</p>
+            <div class="project-tags"><span>DevOps</span><span>GitHub Actions</span><span>PHP</span></div>
+            <a class="project-link" href="ci-dashboard/index.php" target="_blank" rel="noopener">View dashboard</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="client-work">
+    <div class="container">
+      <p class="section-eyebrow">Delivered and running</p>
+      <h2 class="section-title">Client &amp; delivery work</h2>
+      <div class="projects-grid reveal">
+
+        <div class="project-card glass">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
+            <span class="thumb-fallback">AD</span>
+          </div>
+          <div class="project-body">
+            <span class="project-status status-active">Active</span>
+            <h3>Aqualeo Digecom</h3>
+            <p>Program &amp; delivery management consultancy helping SMEs launch eCommerce portals and execute cloud transformation programs end to end.</p>
+            <div class="project-tags"><span>eCommerce</span><span>Cloud</span><span>Delivery</span></div>
+            <a class="project-link" href="https://www.aqualeo.co" target="_blank" rel="nofollow noopener">www.aqualeo.co</a>
           </div>
         </div>
 
@@ -183,58 +263,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="project-card glass">
           <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">PA</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>Panchang App</h3>
-            <p>A Hindu calendar and ritual-timing app, bringing traditional Panchang calculations to a modern interface.</p>
-            <div class="project-tags"><span>Mobile</span><span>Culture</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">SP</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>SHCA Pledge Portal</h3>
-            <p>A community pledge and membership portal, built to make commitments and contributions transparent and easy to track.</p>
-            <div class="project-tags"><span>Community</span><span>Portal</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">HM</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>Housemates</h3>
-            <p>An app for finding compatible future housemates, then managing the shared household afterwards — bills, chores and house rules in one place.</p>
-            <div class="project-tags"><span>Mobile</span><span>Community</span><span>Household</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <img src="https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
-            <span class="thumb-fallback">FH</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-progress">In progress</span>
-            <h3>Family Hub</h3>
-            <p>A family home-management app — shared calendar, to-dos, movie lists and holiday plans, plus a reward system where parents can convert completed chores and homework into TV time, going-out money, or savings toward a bigger gift.</p>
-            <div class="project-tags"><span>Mobile</span><span>Web</span><span>Family</span></div>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
             <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&q=60" alt="" loading="lazy" onerror="this.remove()">
             <span class="thumb-fallback">PL</span>
           </div>
@@ -258,19 +286,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>An eCommerce store serving the UK and UAE with quality art products, soon expanding into crafts and other hobbies.</p>
             <div class="project-tags"><span>eCommerce</span><span>Art</span><span>UK / UAE</span></div>
             <a class="project-link" href="https://www.icreate.art" target="_blank" rel="nofollow noopener">icreate.art</a>
-          </div>
-        </div>
-
-        <div class="project-card glass">
-          <div class="project-thumb">
-            <span class="thumb-fallback">CI</span>
-          </div>
-          <div class="project-body">
-            <span class="project-status status-active">Active</span>
-            <h3>CI/CD Dashboard</h3>
-            <p>Live GitHub Actions status across my repos — build/deploy status at a glance, viewable by anyone, with a login for adding repos or triggering deploys.</p>
-            <div class="project-tags"><span>DevOps</span><span>GitHub Actions</span><span>PHP</span></div>
-            <a class="project-link" href="ci-dashboard/index.php" target="_blank" rel="noopener">View dashboard</a>
           </div>
         </div>
 
@@ -303,5 +318,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </footer>
 
 <script src="script.js"></script>
+<script>
+// Sort GitHub-build cards by recency (activity/order.php), pinned "Build Activity" card stays first.
+fetch('/activity/order.php').then(r => r.json()).then(order => {
+  var grid = document.getElementById('build-grid');
+  if (!grid) return;
+  var cards = Array.from(grid.querySelectorAll('.project-card[data-repo]'));
+  cards.sort(function (a, b) {
+    return (order[b.dataset.repo] || 0) - (order[a.dataset.repo] || 0);
+  });
+  cards.forEach(function (card) { grid.appendChild(card); });
+}).catch(function () { /* keep static order if the board is unreachable */ });
+</script>
 </body>
 </html>
