@@ -598,6 +598,7 @@ button { font-family: inherit; }
   margin: 0 0 16px;
 }
 .page-hero p { color: var(--fg-muted); font-size: 18px; max-width: 600px; }
+.hero-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
 
 /* ===== Projects grid ===== */
 .idea-banner {
