@@ -1,4 +1,5 @@
 .DS_Store
+docs/
 ci-dashboard/config.php
 ci-dashboard/cache/*.json
 ci-dashboard/dev.sqlite
