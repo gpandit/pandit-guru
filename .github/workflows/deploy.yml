@@ -9,4 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Hostinger deploy webhook
-        run: curl -sf -X POST "${{ secrets.HOSTINGER_DEPLOY_WEBHOOK }}"
+        run: |
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"ref\":\"refs/heads/${{ github.ref_name }}\"}" \
+            "${{ secrets.HOSTINGER_DEPLOY_WEBHOOK }}"
