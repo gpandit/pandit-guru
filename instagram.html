@@ -4,27 +4,16 @@
 <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Instagram — Guru Pandit</title>
+<title>Instagram | Guru Pandit</title>
 <meta name="description" content="Latest Instagram posts and reels from Guru Pandit." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TLCJZMQ9');</script>
-<!-- End Google Tag Manager -->
+<!-- Cookie consent gate: loads Google Analytics (GTM) only after opt-in -->
+<script src="/consent.js" defer></script>
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLCJZMQ9"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-
-
 <div class="bg-glow" aria-hidden="true"></div>
 
 <header class="nav" id="nav">
@@ -62,7 +51,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div>
         <p class="eyebrow reveal">Off the clock</p>
         <h1 class="reveal">Latest from Instagram</h1>
-        <p class="reveal">The last 6 posts and reels — pulled in directly via Instagram's embed.</p>
+        <p class="reveal">The last 6 posts and reels, pulled in directly via Instagram's embed.</p>
       </div>
       <a class="btn btn-ghost reveal" href="https://www.instagram.com/gurupandit/" target="_blank" rel="noopener">Follow @gurupandit on Instagram</a>
     </div>
@@ -142,6 +131,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container footer-inner">
     <span>© <span id="year"></span> Guru Pandit</span>
     <span class="muted">IT Program &amp; Delivery Leadership · Tech Strategy</span>
+    <span class="footer-legal"><a href="/privacy.html">Privacy</a><a href="#" data-cookie-settings>Cookie settings</a></span>
     <div class="footer-socials">
       <a href="https://x.com/gurupandit" target="_blank" rel="noopener" aria-label="X (Twitter)">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2.5h3.3l-7.2 8.2 8.5 10.8h-6.6l-5.2-6.6-5.9 6.6H2.5l7.7-8.8L2 2.5h6.8l4.7 6.1 5.4-6.1zm-2.3 17.2h1.8L7.5 4.2H5.6l11 15.5z"/></svg>
@@ -158,21 +148,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script src="script.js"></script>
 <script>
-  // Only let Instagram's embed.js process cards where a real URL has been set.
-  document.querySelectorAll('.ig-card').forEach(card => {
-    const bq = card.querySelector('blockquote');
-    const placeholder = card.querySelector('.ig-placeholder');
-    if (bq.dataset.instgrmPermalink.includes('REPLACE_WITH')) {
-      bq.remove();
-    } else {
-      bq.style.display = 'block';
-      if (placeholder) placeholder.closest('.ig-embed-wrap').style.display = 'none';
+  // Instagram's embed.js shares the visitor's IP with Meta, so only load it
+  // once cookie consent has been granted.
+  let igEmbedLoaded = false;
+  function loadInstagram() {
+    document.querySelectorAll('.ig-card').forEach(card => {
+      const bq = card.querySelector('blockquote');
+      const placeholder = card.querySelector('.ig-placeholder');
+      if (!bq || bq.dataset.igReady) return;
+      if (bq.dataset.instgrmPermalink.includes('REPLACE_WITH')) {
+        bq.remove();
+      } else {
+        bq.dataset.igReady = '1';
+        bq.style.display = 'block';
+        if (placeholder) placeholder.closest('.ig-embed-wrap').style.display = 'none';
+      }
+    });
+    if (!igEmbedLoaded) {
+      igEmbedLoaded = true;
       const s = document.createElement('script');
       s.async = true;
       s.src = 'https://www.instagram.com/embed.js';
       document.body.appendChild(s);
+    } else if (window.instgrm) {
+      window.instgrm.Embeds.process();
     }
-  });
+  }
+
+  if (window.cookieConsent && window.cookieConsent.granted()) {
+    loadInstagram();
+  } else {
+    document.addEventListener('consent-granted', loadInstagram);
+  }
 </script>
 </body>
 </html>
