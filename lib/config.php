@@ -56,6 +56,15 @@ define('RESEND_API_KEY', env_value('RESEND_API_KEY'));
 define('RESEND_FROM', env_value('RESEND_FROM', 'Pandit Guru Website <website@pandit.guru>'));
 define('CONTACT_TO', env_value('CONTACT_TO', 'hello@pandit.guru'));
 
+// ════════ reCAPTCHA v3 (optional contact-form spam protection) ════════
+// When both keys are set, the contact form runs an invisible reCAPTCHA v3
+// check and rejects low-scoring (bot-like) submissions. Leave blank to
+// disable — the form then works with no captcha. Site key is public; secret
+// stays server-side.
+define('RECAPTCHA_SITE_KEY', env_value('RECAPTCHA_SITE_KEY'));
+define('RECAPTCHA_SECRET', env_value('RECAPTCHA_SECRET'));
+define('RECAPTCHA_MIN_SCORE', (float) env_value('RECAPTCHA_MIN_SCORE', '0.5'));
+
 // ════════ STARTUP VALIDATION ════════
 // Catches misconfigured deployments early with a clear error_log message
 // instead of a cryptic PDO/sodium exception that returns a generic 500.

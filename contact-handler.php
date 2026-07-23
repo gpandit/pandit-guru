@@ -16,6 +16,7 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/crypto.php';
 require __DIR__ . '/lib/geo.php';
 require __DIR__ . '/lib/resend.php';
+require __DIR__ . '/lib/recaptcha.php';
 
 header('Content-Type: application/json');
 
@@ -114,10 +115,29 @@ if ($f && is_array($f['name'])) {
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 
+// ── reCAPTCHA v3 (no-op unless RECAPTCHA_SECRET is configured). Rejects
+// bot-like submissions before we touch the DB or send mail.
+[$rcOk, $rcScore, $rcErr] = recaptcha_verify($_POST['recaptcha_token'] ?? '', $ip, 'contact');
+if (!$rcOk) {
+  error_log('Contact reCAPTCHA failed: ' . $rcErr);
+  fail(400, 'We couldn\'t verify that you\'re human. Please try again.');
+}
+if ($rcScore !== null && $rcScore < RECAPTCHA_MIN_SCORE) {
+  error_log('Contact reCAPTCHA low score: ' . $rcScore);
+  fail(429, 'Your submission looked automated. Please try again in a moment.');
+}
+
 // ── Rate limit + store. DB errors are non-fatal: we still try to email so a
 // transient DB issue doesn't silently drop the enquiry.
 $stored = false;
 try {
+  // Throttle rapid repeats: one stored submission per IP per 30 seconds.
+  $rl30 = db()->prepare('SELECT COUNT(*) FROM leads WHERE ip = ? AND created_at > (NOW() - INTERVAL 30 SECOND)');
+  $rl30->execute([$ip]);
+  if ((int) $rl30->fetchColumn() >= 1) {
+    fail(429, 'Please wait a few seconds before sending another message.');
+  }
+
   // Max 5 submissions per IP per 10 minutes.
   $rl = db()->prepare('SELECT COUNT(*) FROM leads WHERE ip = ? AND created_at > (NOW() - INTERVAL 10 MINUTE)');
   $rl->execute([$ip]);

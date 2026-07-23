@@ -1,6 +1,8 @@
 // Contact form: international phone input (intl-tel-input), client-side file
-// validation, and a multipart submit to /contact-handler.php. Progressive
-// enhancement — the handler re-validates everything server-side.
+// validation, optional reCAPTCHA v3, and a multipart submit to
+// /contact-handler.php. Progressive enhancement — the handler re-validates
+// everything server-side, and reCAPTCHA is skipped entirely when no site key
+// is configured.
 (function () {
   var form = document.getElementById('contact-form');
   if (!form) return;
@@ -11,23 +13,35 @@
   var statusEl = document.getElementById('cf-status');
   var submitBtn = document.getElementById('cf-submit');
   var iti = null;
+  var recaptchaSiteKey = null;
 
   var MAX_FILES = 3;
   var MAX_TOTAL = 5 * 1024 * 1024; // 5 MB
   var ALLOWED_EXT = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'webp', 'gif'];
 
-  if (phoneInput && window.intlTelInput) {
+  // ── Bootstrap: one call gets the IP-default country + reCAPTCHA site key.
+  function initPhone(country) {
+    if (!phoneInput || !window.intlTelInput) return;
     iti = window.intlTelInput(phoneInput, {
-      initialCountry: 'auto',
-      separateDialCode: true,
-      geoIpLookup: function (callback) {
-        fetch('/contact-geo.php')
-          .then(function (r) { return r.json(); })
-          .then(function (d) { callback(d && d.country ? d.country : 'ae'); })
-          .catch(function () { callback('ae'); });
-      }
+      initialCountry: country || 'ae',
+      separateDialCode: true
     });
   }
+  function loadRecaptcha(key) {
+    recaptchaSiteKey = key;
+    var s = document.createElement('script');
+    s.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(key);
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+  fetch('/contact-geo.php')
+    .then(function (r) { return r.json(); })
+    .then(function (cfg) {
+      initPhone(cfg && cfg.country ? cfg.country : 'ae');
+      if (cfg && cfg.recaptchaSiteKey) loadRecaptcha(cfg.recaptchaSiteKey);
+    })
+    .catch(function () { initPhone('ae'); });
 
   function setStatus(msg, kind) {
     statusEl.textContent = msg;
@@ -41,7 +55,6 @@
                         : Math.max(1, Math.round(b / 1024)) + ' KB';
   }
 
-  // Returns an error string if the current selection is invalid, else null.
   function validateFiles() {
     if (!fileInput || !fileInput.files) return null;
     var files = fileInput.files;
@@ -77,6 +90,27 @@
     });
   }
 
+  function send(fd) {
+    fetch('/contact-handler.php', { method: 'POST', body: fd })
+      .then(function (res) {
+        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+      })
+      .then(function (result) {
+        if (result.ok && result.data.success) {
+          form.reset();
+          renderFileList();
+          if (iti) iti.setCountry(iti.getSelectedCountryData().iso2 || 'ae');
+          setStatus('Thanks — your message has been sent. I\'ll get back to you soon.', 'success');
+        } else {
+          fieldError(result.data.error || 'Something went wrong. Please try again.');
+        }
+      })
+      .catch(function () {
+        fieldError('Network error. Please try again, or email hello@pandit.guru directly.');
+      })
+      .finally(function () { submitBtn.disabled = false; });
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -95,32 +129,22 @@
     var fileErr = validateFiles();
     if (fileErr) return fieldError(fileErr);
 
-    // Build multipart body from the form, then normalise the phone to E.164.
     var fd = new FormData(form);
     fd.set('phone', iti && phoneInput.value.trim() ? iti.getNumber() : (phoneInput ? phoneInput.value.trim() : ''));
 
     submitBtn.disabled = true;
     setStatus('Sending…', 'pending');
 
-    fetch('/contact-handler.php', { method: 'POST', body: fd })
-      .then(function (res) {
-        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
-      })
-      .then(function (result) {
-        if (result.ok && result.data.success) {
-          form.reset();
-          renderFileList();
-          if (iti) iti.setCountry(iti.getSelectedCountryData().iso2 || 'ae');
-          setStatus('Thanks — your message has been sent. I\'ll get back to you soon.', 'success');
-        } else {
-          fieldError(result.data.error || 'Something went wrong. Please try again.');
-        }
-      })
-      .catch(function () {
-        fieldError('Network error. Please try again, or email hello@pandit.guru directly.');
-      })
-      .finally(function () {
-        submitBtn.disabled = false;
+    // If reCAPTCHA is enabled, fetch a token first, then submit. On any token
+    // failure we still submit — the server decides whether to require it.
+    if (recaptchaSiteKey && window.grecaptcha && window.grecaptcha.execute) {
+      window.grecaptcha.ready(function () {
+        window.grecaptcha.execute(recaptchaSiteKey, { action: 'contact' })
+          .then(function (token) { fd.set('recaptcha_token', token); send(fd); })
+          .catch(function () { send(fd); });
       });
+    } else {
+      send(fd);
+    }
   });
 })();
