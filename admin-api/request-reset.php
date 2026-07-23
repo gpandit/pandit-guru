@@ -16,7 +16,7 @@ $email = strtolower(trim($body['email'] ?? ''));
 usleep(300000);
 
 // Always respond success to avoid leaking which emails have accounts — and so a
-// transient DB/SMTP error never surfaces as a 500 to the user. Failures are logged.
+// transient DB/email error never surfaces as a 500 to the user. Failures are logged.
 try {
   if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $user = find_user_by_email($email);

@@ -123,7 +123,7 @@ $html =
   . nl2br($esc($message)) . '</div>'
   . '</div>';
 
-[$sent, $sendErr] = resend_send($mailSubject, $html, $email);
+[$sent, $sendErr] = resend_send(CONTACT_TO, $mailSubject, $html, $email);
 if (!$sent) {
   error_log('Contact email send failed: ' . $sendErr);
 }

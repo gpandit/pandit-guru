@@ -47,18 +47,11 @@ define('DB_CHARSET', env_value('DB_CHARSET', 'utf8mb4'));
 define('ENCRYPTION_KEY', env_value('ENCRYPTION_KEY'));
 define('BLIND_INDEX_KEY', env_value('BLIND_INDEX_KEY'));
 
-// ════════ SMTP (admin invite/reset emails) ════════
-define('MAIL_HOST', env_value('MAIL_HOST', 'smtp-pulse.com'));
-define('MAIL_PORT', (int) env_value('MAIL_PORT', '465'));      // 465 = SSL, 587 = TLS
-define('MAIL_USER', env_value('MAIL_USER'));
-define('MAIL_PASS', env_value('MAIL_PASS'));
-define('MAIL_FROM', env_value('MAIL_FROM', 'hello@pandit.guru'));
-define('MAIL_FROM_NAME', env_value('MAIL_FROM_NAME', 'Pandit Guru'));
-
-// ════════ RESEND (public contact form) ════════
-// The contact form emails via Resend's HTTP API instead of SMTP. RESEND_FROM
-// must use a domain verified in your Resend account (pandit.guru). CONTACT_TO
-// is where submissions are delivered.
+// ════════ RESEND (all transactional email: contact form + admin invite/reset) ════════
+// Email is sent via Resend's HTTP API. RESEND_FROM must use a domain verified
+// in your Resend account (pandit.guru). CONTACT_TO is where contact-form
+// submissions are delivered; admin reset/invite mail goes to the admin's own
+// address.
 define('RESEND_API_KEY', env_value('RESEND_API_KEY'));
 define('RESEND_FROM', env_value('RESEND_FROM', 'Pandit Guru Website <website@pandit.guru>'));
 define('CONTACT_TO', env_value('CONTACT_TO', 'hello@pandit.guru'));
@@ -69,7 +62,7 @@ define('CONTACT_TO', env_value('CONTACT_TO', 'hello@pandit.guru'));
 (function () {
   $required = [
     'DB_NAME', 'DB_USER', 'DB_PASS', 'ENCRYPTION_KEY', 'BLIND_INDEX_KEY',
-    'MAIL_USER', 'MAIL_PASS', 'ADMIN_PASSWORD_HASH',
+    'ADMIN_PASSWORD_HASH',
   ];
   $missing = [];
   foreach ($required as $const) {

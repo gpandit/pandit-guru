@@ -114,7 +114,7 @@ function clear_reset_token($userId) {
 
 /** Send a password-set / reset email containing the tokenised link. */
 function send_reset_email($email, $name, $token, $isInvite) {
-  require_once __DIR__ . '/mailer.php';
+  require_once __DIR__ . '/resend.php';
   $link = rtrim(SITE_URL, '/') . '/admin/set-password?token=' . urlencode($token);
   $subject = $isInvite ? (SITE_NAME . ' — set up your admin account')
                        : (SITE_NAME . ' — reset your password');
@@ -131,17 +131,9 @@ function send_reset_email($email, $name, $token, $isInvite) {
     . ($isInvite ? 'Set my password' : 'Reset my password') . '</a></p>'
     . '<p style="color:#888;font-size:12px">This link expires in 24 hours.</p></div>';
 
-  try {
-    $mail = make_mailer();
-    $mail->addAddress($email, $name ?: $email);
-    $mail->Subject = $subject;
-    $mail->isHTML(true);
-    $mail->Body = $html;
-    $mail->AltBody = $intro . "\n\n" . $link;
-    $mail->send();
-    return true;
-  } catch (Throwable $e) {
-    error_log('reset email error: ' . $e->getMessage());
-    return false;
+  [$ok, $err] = resend_send($email, $subject, $html);
+  if (!$ok) {
+    error_log('reset email error: ' . $err);
   }
+  return $ok;
 }
