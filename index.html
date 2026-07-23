@@ -5,6 +5,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Guru Pandit | IT Program & Delivery Leader</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="description" content="Guru Pandit, IT Program and Delivery Manager. 25+ years leading eCommerce, CRM, ERP and cloud transformations for Dyson, JLR, FCA, Deloitte and more. Now driving AI-enabled business growth." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -482,6 +486,13 @@
           <div class="cf-field">
             <label for="cf-message">Message <span class="cf-req">*</span></label>
             <textarea id="cf-message" name="message" rows="5" maxlength="5000" required></textarea>
+          </div>
+          <div class="cf-field">
+            <label for="cf-files">Attachments</label>
+            <input type="file" id="cf-files" name="attachments[]" multiple
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif">
+            <p class="cf-hint">Up to 3 files, 5 MB total. PDF, Word, Excel, PowerPoint or images.</p>
+            <ul class="cf-filelist" id="cf-filelist" aria-live="polite"></ul>
           </div>
           <!-- Honeypot: hidden from real users; bots that fill it are silently dropped. -->
           <div class="cf-hp" aria-hidden="true">

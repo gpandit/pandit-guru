@@ -664,6 +664,48 @@ button { font-family: inherit; }
 .cf-status--error { color: #f87171; }
 [data-theme="light"] .cf-status--error { color: #c0392b; }
 .cf-alt { font-size: 13px; margin: 8px 0 0; }
+.cf-hint { margin: 6px 0 0; font-size: 12px; color: var(--fg-muted); }
+.contact-form input[type="file"] {
+  width: 100%;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--fg-muted);
+  background: var(--surface);
+  border: 1px dashed var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.contact-form input[type="file"]:hover { border-color: var(--accent-2); }
+.contact-form input[type="file"]::file-selector-button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg-elev);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+.contact-form input[type="file"]::file-selector-button:hover { border-color: var(--accent-2); }
+.cf-filelist {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.cf-filelist li {
+  font-size: 13px;
+  color: var(--fg-muted);
+  padding: 3px 0 3px 18px;
+  position: relative;
+}
+.cf-filelist li::before {
+  content: "📎";
+  position: absolute;
+  left: 0;
+  font-size: 11px;
+}
 
 /* intl-tel-input theming to match the site tokens.
    Vars live on :root because v25 appends the country dropdown to <body>

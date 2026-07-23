@@ -20,9 +20,11 @@ require_once __DIR__ . '/config.php';
  * @param string      $subject Plain-text subject line.
  * @param string      $html    HTML body.
  * @param string|null $replyTo Optional Reply-To (e.g. the visitor's email).
+ * @param array       $attachments Optional list of ['filename' => string,
+ *                                 'content' => base64 string] entries.
  * @return array{0:bool,1:?string} [ok, errorMessage]
  */
-function resend_send($to, $subject, $html, $replyTo = null) {
+function resend_send($to, $subject, $html, $replyTo = null, array $attachments = []) {
   if (RESEND_API_KEY === '') {
     return [false, 'RESEND_API_KEY not configured'];
   }
@@ -35,6 +37,11 @@ function resend_send($to, $subject, $html, $replyTo = null) {
   ];
   if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
     $payload['reply_to'] = $replyTo;
+  }
+  if ($attachments) {
+    // Resend expects each attachment as {filename, content} where content is
+    // the base64-encoded file bytes.
+    $payload['attachments'] = array_values($attachments);
   }
 
   $ch = curl_init('https://api.resend.com/emails');
