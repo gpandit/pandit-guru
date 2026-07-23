@@ -159,6 +159,8 @@ button { font-family: inherit; }
   font-size: 18px;
 }
 .logo span { color: var(--accent-2); }
+.logo .logo-hl { color: #a3e635; /* lime green on dark background */ }
+[data-theme="light"] .logo .logo-hl { color: #006994; /* sea blue on light background */ }
 .nav-links {
   display: flex;
   gap: 28px;
@@ -594,6 +596,99 @@ button { font-family: inherit; }
   margin: 28px 0 20px;
 }
 .location { font-size: 14px; }
+
+/* ===== Contact form ===== */
+.contact-form {
+  max-width: 560px;
+  margin: 32px auto 8px;
+  text-align: left;
+}
+.cf-row {
+  display: flex;
+  gap: 16px;
+}
+.cf-row .cf-field { flex: 1; min-width: 0; }
+.cf-field {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.cf-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  margin-bottom: 6px;
+}
+.cf-req { color: var(--accent-2); }
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 15px;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.contact-form textarea { resize: vertical; min-height: 120px; }
+.contact-form input::placeholder,
+.contact-form textarea::placeholder { color: var(--fg-muted); opacity: 0.7; }
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  background: var(--bg-elev);
+}
+/* Honeypot — visually removed but still in the DOM for bots to trip on. */
+.cf-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.cf-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.cf-footer .btn { flex-shrink: 0; }
+#cf-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.cf-status { margin: 0; font-size: 14px; }
+.cf-status--pending { color: var(--fg-muted); }
+.cf-status--success { color: var(--accent-2); }
+.cf-status--error { color: #f87171; }
+[data-theme="light"] .cf-status--error { color: #c0392b; }
+.cf-alt { font-size: 13px; margin: 8px 0 0; }
+
+/* intl-tel-input theming to match the site tokens.
+   Vars live on :root because v25 appends the country dropdown to <body>
+   (outside .contact-form), so it inherits theming from the root, not the widget.
+   These reference the site tokens, so they flip automatically with the theme. */
+:root {
+  --iti-border-color: var(--surface-border);
+  --iti-dropdown-bg: var(--bg-elev);
+  --iti-hover-color: var(--surface);
+  --iti-arrow-color: var(--fg-muted);
+  --iti-dialcode-color: var(--fg-muted);
+}
+.contact-form .iti { width: 100%; }
+.iti__selected-dial-code { color: var(--fg); }
+.iti__country-name { color: var(--fg); }
+.iti__country .iti__dial-code { color: var(--fg-muted); }
+.iti__search-input {
+  color: var(--fg);
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--surface-border);
+}
+.iti__search-input::placeholder { color: var(--fg-muted); }
+@media (max-width: 560px) {
+  .cf-row { flex-direction: column; gap: 0; }
+}
 
 /* ===== Inner page hero (Projects / Instagram) ===== */
 .page-hero { padding: 160px 0 64px; }

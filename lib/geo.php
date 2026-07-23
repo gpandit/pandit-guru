@@ -28,3 +28,26 @@ function geo_country($ip) {
   $country = trim((string) ($data['country'] ?? ''));
   return $country === '' ? null : $country;
 }
+
+/**
+ * Returns a lowercase ISO 3166-1 alpha-2 country code (e.g. "ae") or null.
+ * Used to preselect the contact form's phone-input country from the visitor's
+ * IP. Same best-effort contract as geo_country(): null means "unknown".
+ */
+function geo_country_code($ip) {
+  $ip = trim((string) $ip);
+  if ($ip === '') return null;
+  if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+    return null;
+  }
+
+  $url = 'http://ip-api.com/json/' . urlencode($ip) . '?fields=status,countryCode';
+  $ctx = stream_context_create(['http' => ['timeout' => 2, 'ignore_errors' => true]]);
+  $raw = @file_get_contents($url, false, $ctx);
+  if ($raw === false) return null;
+
+  $data = json_decode($raw, true);
+  if (!is_array($data) || ($data['status'] ?? '') !== 'success') return null;
+  $code = strtolower(trim((string) ($data['countryCode'] ?? '')));
+  return preg_match('/^[a-z]{2}$/', $code) ? $code : null;
+}

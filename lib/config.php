@@ -55,6 +55,14 @@ define('MAIL_PASS', env_value('MAIL_PASS'));
 define('MAIL_FROM', env_value('MAIL_FROM', 'hello@pandit.guru'));
 define('MAIL_FROM_NAME', env_value('MAIL_FROM_NAME', 'Pandit Guru'));
 
+// ════════ RESEND (public contact form) ════════
+// The contact form emails via Resend's HTTP API instead of SMTP. RESEND_FROM
+// must use a domain verified in your Resend account (pandit.guru). CONTACT_TO
+// is where submissions are delivered.
+define('RESEND_API_KEY', env_value('RESEND_API_KEY'));
+define('RESEND_FROM', env_value('RESEND_FROM', 'Pandit Guru Website <website@pandit.guru>'));
+define('CONTACT_TO', env_value('CONTACT_TO', 'hello@pandit.guru'));
+
 // ════════ STARTUP VALIDATION ════════
 // Catches misconfigured deployments early with a clear error_log message
 // instead of a cryptic PDO/sodium exception that returns a generic 500.

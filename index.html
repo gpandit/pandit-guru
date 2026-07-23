@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/vendor/intl-tel-input/css/intlTelInput.min.css">
 <link rel="stylesheet" href="styles.css">
 <!-- Cookie consent gate: loads Google Analytics (GTM) only after opt-in -->
 <script src="/consent.js" defer></script>
@@ -18,7 +19,7 @@
 
 <header class="nav" id="nav">
   <div class="container nav-inner">
-    <a href="#top" class="logo">GURU<span>PANDIT</span></a>
+    <a href="#top" class="logo">GURU<span>P<b class="logo-hl">A</b>ND<b class="logo-hl">I</b>T</span></a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#achievements">Achievements</a>
       <a href="#experience">Experience</a>
@@ -452,6 +453,48 @@
           A cloud migration, a CRM launch, or something messier. I help organisations
           get delivery right the first time.
         </p>
+
+        <form class="contact-form" id="contact-form" novalidate>
+          <div class="cf-row">
+            <div class="cf-field">
+              <label for="cf-name">Name <span class="cf-req">*</span></label>
+              <input type="text" id="cf-name" name="name" autocomplete="name" maxlength="200" required>
+            </div>
+            <div class="cf-field">
+              <label for="cf-email">Email <span class="cf-req">*</span></label>
+              <input type="email" id="cf-email" name="email" autocomplete="email" maxlength="200" required>
+            </div>
+          </div>
+          <div class="cf-row">
+            <div class="cf-field">
+              <label for="cf-phone">Phone</label>
+              <input type="tel" id="cf-phone" name="phone" autocomplete="tel">
+            </div>
+            <div class="cf-field">
+              <label for="cf-company">Company</label>
+              <input type="text" id="cf-company" name="company" autocomplete="organization" maxlength="200">
+            </div>
+          </div>
+          <div class="cf-field">
+            <label for="cf-subject">Subject</label>
+            <input type="text" id="cf-subject" name="subject" maxlength="200">
+          </div>
+          <div class="cf-field">
+            <label for="cf-message">Message <span class="cf-req">*</span></label>
+            <textarea id="cf-message" name="message" rows="5" maxlength="5000" required></textarea>
+          </div>
+          <!-- Honeypot: hidden from real users; bots that fill it are silently dropped. -->
+          <div class="cf-hp" aria-hidden="true">
+            <label for="cf-website">Website</label>
+            <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="cf-footer">
+            <button type="submit" class="btn btn-primary" id="cf-submit">Send message</button>
+            <p class="cf-status" id="cf-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <p class="cf-alt muted">Prefer another channel?</p>
         <div class="contact-actions">
           <a class="btn btn-primary" href="mailto:hello@pandit.guru">hello@pandit.guru</a>
           <a class="btn btn-ghost" href="https://www.linkedin.com/in/gurupandit" target="_blank" rel="noopener">LinkedIn</a>
@@ -488,5 +531,7 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="/assets/vendor/intl-tel-input/js/intlTelInputWithUtils.min.js" defer></script>
+<script src="/contact-form.js" defer></script>
 </body>
 </html>
