@@ -62,7 +62,7 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES); }
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="https://pandit.guru/styles.css">
 <style>
  /* gitboard cards, styled on pandit.guru design tokens (gb- prefix avoids collisions) */
  .gb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1.6rem}
@@ -93,14 +93,14 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES); }
 
 <header class="nav" id="nav">
   <div class="container nav-inner">
-    <a href="/" class="logo">GURU<span>PANDIT</span></a>
+    <a href="https://pandit.guru/" class="logo">GURU<span>PANDIT</span></a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="/index.html#achievements">Achievements</a>
-      <a href="/index.html#experience">Experience</a>
-      <a href="/index.html#skills">Skills</a>
-      <a href="/projects.html">Projects</a>
-      <a href="/news-blog">News &amp; Blog</a>
-      <a href="/index.html#contact">Contact</a>
+      <a href="https://pandit.guru/index.html#achievements">Achievements</a>
+      <a href="https://pandit.guru/index.html#experience">Experience</a>
+      <a href="https://pandit.guru/index.html#skills">Skills</a>
+      <a href="https://pandit.guru/projects.html">Projects</a>
+      <a href="https://pandit.guru/news-blog">News &amp; Blog</a>
+      <a href="https://pandit.guru/index.html#contact">Contact</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -112,12 +112,12 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES); }
     </button>
   </div>
   <div class="mobile-menu" id="mobileMenu">
-    <a href="/index.html#achievements">Achievements</a>
-    <a href="/index.html#experience">Experience</a>
-    <a href="/index.html#skills">Skills</a>
-    <a href="/projects.html">Projects</a>
-    <a href="/news-blog">News &amp; Blog</a>
-    <a href="/index.html#contact">Contact</a>
+    <a href="https://pandit.guru/index.html#achievements">Achievements</a>
+    <a href="https://pandit.guru/index.html#experience">Experience</a>
+    <a href="https://pandit.guru/index.html#skills">Skills</a>
+    <a href="https://pandit.guru/projects.html">Projects</a>
+    <a href="https://pandit.guru/news-blog">News &amp; Blog</a>
+    <a href="https://pandit.guru/index.html#contact">Contact</a>
     <a class="btn btn-primary" href="mailto:hello@pandit.guru">Get in touch</a>
   </div>
 </header>
@@ -168,5 +168,5 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES); }
   </div>
 </footer>
 
-<script src="/script.js"></script>
+<script src="https://pandit.guru/script.js"></script>
 </body></html>
