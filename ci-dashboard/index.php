@@ -177,14 +177,16 @@ if ($loggedIn) {
     sort($accessibleRepos);
 }
 
+// Plain str* rather than mb_*: this host's PHP has no mbstring, and GitHub
+// repo names are ASCII ([A-Za-z0-9._-]) so the two behave identically here.
 function ci_initials(string $repo): string
 {
     $parts = preg_split('/[-_.\s]+/', $repo, -1, PREG_SPLIT_NO_EMPTY);
     $initials = '';
     foreach (array_slice($parts, 0, 2) as $p) {
-        $initials .= mb_strtoupper(mb_substr($p, 0, 1));
+        $initials .= strtoupper(substr($p, 0, 1));
     }
-    return $initials !== '' ? $initials : mb_strtoupper(mb_substr($repo, 0, 2));
+    return $initials !== '' ? $initials : strtoupper(substr($repo, 0, 2));
 }
 
 // Maps a run's status/conclusion onto the site's existing badge classes
