@@ -6,7 +6,10 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # The actual build happens on Hostinger's side — this job only fires a
+    # webhook — but GitHub still bills a full minute per run regardless.
+    # Self-hosted runner minutes aren't metered.
+    runs-on: [self-hosted, contabo]
     steps:
       - name: Trigger Hostinger deploy webhook
         run: |
