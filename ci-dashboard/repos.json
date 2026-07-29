@@ -1,1 +1,67 @@
-[{"owner":"octocat","repo":"hello-world"}]
+[
+    {
+        "owner": "gpandit",
+        "repo": "FriendsOfSchool",
+        "name": "Friends of School"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "dietassure",
+        "name": "DietAssure"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "pandit-xyz",
+        "name": "pandit.xyz"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "rooted",
+        "name": "Rooted"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "gatheris",
+        "name": "Gatheris"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "housemates",
+        "name": "Housemates"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "bishop",
+        "name": "Bishop"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "panchang",
+        "name": "Panchang"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "foodscan",
+        "name": "FoodScan"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "LabelLens",
+        "name": "LabelLens"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "pandit-guru",
+        "name": "pandit.guru"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "aqualeo-co",
+        "name": "Aqualeo"
+    },
+    {
+        "owner": "gpandit",
+        "repo": "drsharma-uk",
+        "name": "drsharma.uk"
+    }
+]

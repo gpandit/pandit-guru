@@ -43,9 +43,10 @@ Composer, no background workers. User accounts live in a MySQL `users` table.
 
 ## Day-to-day use
 
-- **Add/remove repos**: use the "Tracked repos" panel on the dashboard —
-  stored in `repos.json` (must be writable by PHP, default permissions
-  from upload are fine).
+- **Add/remove repos**: edit `repos.json` in git and let the deploy carry it
+  over. The dashboard's "Tracked repos" panel writes the same file, but this
+  site deploys by git checkout, so a UI edit is reverted to the committed
+  version on the next push to `main` — git is the source of truth.
 - **Add/remove users**: admins see an "Admin" link in the dashboard header,
   leading to `admin.php`. Adding a user generates a fresh TOTP secret shown
   once on screen — hand it to the new user immediately, it isn't
